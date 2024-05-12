@@ -10,14 +10,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { User } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const formSchema = z.object({
   email: z.string().optional(),
   name: z.string().min(1, "Name is required"),
-  addresssLine1: z.string().min(1, "AddressLine1 is required"),
+  addressLine1: z.string().min(1, "AddressLine1 is required"),
   city: z.string().min(1, "City is required"),
   country: z.string().min(1, "Country is required"),
 });
@@ -25,23 +27,20 @@ const formSchema = z.object({
 type UserFormData = z.infer<typeof formSchema>;
 
 type Props = {
+  currentUser: User;
   onSave: (userProfileData: UserFormData) => void;
   isLoading: boolean;
 };
 
-const defaultValues: UserFormData = {
-  email: undefined, // Initialize with undefined for optional field
-  name: "",
-  addresssLine1: "",
-  city: "",
-  country: "",
-};
-
-const UserProfileForm = ({ onSave, isLoading }: Props) => {
+const UserProfileForm = ({ currentUser, onSave, isLoading }: Props) => {
   const form = useForm<UserFormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: defaultValues,
+    defaultValues: currentUser,
   });
+
+  useEffect(() => {
+    form.reset(currentUser);
+  }, [currentUser, form]);
 
   return (
     <Form {...form}>
@@ -84,7 +83,7 @@ const UserProfileForm = ({ onSave, isLoading }: Props) => {
         <div className="flex flex-col md:flex-row gap-4">
           <FormField
             control={form.control}
-            name="addresssLine1"
+            name="addressLine1"
             render={({ field }) => (
               <FormItem className="flex-1">
                 <FormLabel>Address Line</FormLabel>
